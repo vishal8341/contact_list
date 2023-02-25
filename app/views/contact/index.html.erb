@@ -137,7 +137,7 @@
                     </div>
                     <div class="clearfix">
                     </div>
-                        <a href="#" class="btn btn-success btn-block flatbtn">CALL</a>
+                      <button class="btn btn-success btn-block flatbtn" id="find_contacts"> Find Contact </button>
                 </div>
             </div>
             <div class="row">
@@ -183,6 +183,7 @@
 </div>
 
   <script>
+
     $(document).ready(function () {
       $('.num').click(function () {
         var num = $(this);
@@ -195,123 +196,69 @@
         $("#no-count").text('');
         var matched_contacts = [];
         var list_contact = [];
-        var contact_list_table = new Array();
-        contact_list_table.push(["Name", "Contact No."]);
-        $.each(contact_list, function( index, value ) {
-          if ($(this)[0].number.search(new RegExp(filter, "i")) < 0) {
-              $(this).fadeOut();
-          } else {
-              $(this).show();
-              matched_contacts.push($(this)[0])
-              count++;
-          }
-        });
-
-        $.each(matched_contacts, function( index, value ) {
-          contact_list_table.push([value.name, value.number])
-        });
-        var table = $("<table />");
-        table[0].border = "1";
-
-        //Get the count of columns.
-        var columnCount = contact_list_table[0].length;
-
-        //Add the header row.
-        var row = $(table[0].insertRow(-1));
-        for (var i = 0; i < columnCount; i++) {
-            var headerCell = $("<th />");
-            headerCell.html(contact_list_table[0][i]);
-            row.append(headerCell);
-        }
-
-        //Add the data rows.
-        for (var i = 1; i < contact_list_table.length; i++) {
-            row = $(table[0].insertRow(-1));
-            for (var j = 0; j < columnCount; j++) {
-                var cell = $("<td />");
-                cell.html(contact_list_table[i][j]);
-                row.append(cell);
-            }
-        }
-
-        var dvTable = $("#dvTable");
-        dvTable.html("");
-        dvTable.append(table);
-        $( "table" ).addClass( "table table-striped" );
-
-        // Update the count
-        var numberItems = count;
-        $("#filter-count").text("Number of Contacts = "+count);
-        if(count < 1) {
-          $("#no-count").text('No result');
-        } else {
-          $("#no-count").text('');
-        }
-      });
-
-
-       $("#filter").change(function(){
-        var filter = $(this).val(), count = 0;
-         var contact_list = JSON.parse("<%= @contacts.to_json %>".replace(/&quot;/g,'"'));
-        $("#no-count").text('');
-        var matched_contacts = [];
-        var list_contact = [];
-        var contact_list_table = new Array();
-        contact_list_table.push(["Name", "Contact No."]);
-        $.each(contact_list, function( index, value ) {
-          if ($(this)[0].number.search(new RegExp(filter, "i")) < 0) {
-              $(this).fadeOut();
-          } else {
-              $(this).show();
-              matched_contacts.push($(this)[0])
-              count++;
-          }
-        });
-
-        $.each(matched_contacts, function( index, value ) {
-          contact_list_table.push([value.name, value.number])
-        });
-        var table = $("<table />");
-        table[0].border = "1";
-
-        //Get the count of columns.
-        var columnCount = contact_list_table[0].length;
-
-        //Add the header row.
-        var row = $(table[0].insertRow(-1));
-        for (var i = 0; i < columnCount; i++) {
-            var headerCell = $("<th />");
-            headerCell.html(contact_list_table[0][i]);
-            row.append(headerCell);
-        }
-
-        //Add the data rows.
-        for (var i = 1; i < contact_list_table.length; i++) {
-            row = $(table[0].insertRow(-1));
-            for (var j = 0; j < columnCount; j++) {
-                var cell = $("<td />");
-                cell.html(contact_list_table[i][j]);
-                row.append(cell);
-            }
-        }
-
-        var dvTable = $("#dvTable");
-        dvTable.html("");
-        dvTable.append(table);
-
-
-        // Update the count
-        var numberItems = count;
-        $("#filter-count").text("Number of Contacts = "+count);
-        if(count < 1) {
-          $("#no-count").text('No result');
-        } else {
-          $("#no-count").text('');
-        }
       });
     });
 
+  </script>
 
+  <script>
+    $('#find_contacts').click(function(){
+      var contact = $("#filter").val();
+      if(contact.length < 10){
+        alert("Please enter correct contact number");
+      }else{
+        $.ajax({
+          type: 'GET',
+            // dataType:"jsonp",
+            url: 'http://localhost:3000/contact/get_contact',
+            data: jQuery.param({ number: contact}) ,
+          success: function (data, status, xhr) {
+            debugger
+            console.log('data: ', data);
+            display_contact_table(data)
+          }
+        });
+      }
+    });
+
+    function display_contact_table(contact_details){
+      debugger
+      var contact_list_table = new Array();
+      contact_list_table.push(["Name", "Contact No."]);
+      if(contact_details != null){
+         contact_list_table.push([contact_details.name, contact_details.contact_number])
+      }else{
+        contact_list_table.push(["No data", "No data"])
+      }
+      var table = $("<table />");
+      table[0].border = "1";
+
+      //Get the count of columns.
+      var columnCount = contact_list_table[0].length;
+
+      //Add the header row.
+      var row = $(table[0].insertRow(-1));
+      for (var i = 0; i < columnCount; i++) {
+          var headerCell = $("<th />");
+          headerCell.html(contact_list_table[0][i]);
+          row.append(headerCell);
+      }
+
+      //Add the data rows.
+      for (var i = 1; i < contact_list_table.length; i++) {
+          row = $(table[0].insertRow(-1));
+          for (var j = 0; j < columnCount; j++) {
+              var cell = $("<td />");
+              cell.html(contact_list_table[i][j]);
+              row.append(cell);
+          }
+      }
+
+      var dvTable = $("#dvTable");
+      dvTable.html("");
+      dvTable.append(table);
+      $( "table" ).addClass( "table table-striped" );
+    }
 
   </script>
 </body>
